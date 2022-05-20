@@ -8,7 +8,7 @@ We first need to activate the environment, add the local Tag module and then ins
 julia> include("setup.jl")
 ```
 
-The supplemental material was supplied with polices and action value functions for RockSample(8, 4, 10, -1) and Tag(). You can start running those simulations immediately. Reference the Running Simulations section. To simulate the RockSample(7, 8, 20, 0) environment, you will need to generate the policy and action value matrix. Reference the Generating Policies section for directions on completing that process. The problems are referenced using the `:rs84` and `tag` Symbols.  The RockSample(7, 8, 10, 0) problem has the `:rs78` Symbol defined and ready for use after a policy and action value matrix is generated.
+The supplemental material was supplied with polices and action value functions for RockSample(8, 4, 10, -1) and Tag(). You can start running those simulations immediately. Reference the Running Simulations section. To simulate the RockSample(7, 8, 20, 0) environment, you will need to generate the policy and action value matrix. Reference the Generating Policies section for directions on completing that process. The problems are referenced using the `:rs84` and `:tag` Symbols.  The RockSample(7, 8, 10, 0) problem has the `:rs78` Symbol defined and ready for use after a policy and action value matrix is generated.
 
 # Running Simulations
 The simulattion function is defined in `run_sims.jl` and is the `run_sim` function. See the doc string for detailed information about the arguments for this function. This file should be included when running the `setup.jl` script. However, if it was not, we can include this file by
@@ -41,7 +41,7 @@ Details at each step can be output by setting the `verbose` keyword to `true`. A
 A visual depiction of the scneario can be output by setting the `visualize` keyword to `true`. Recommend using `visualize` for single runs only! In each scenario, a visualization of the belief is shown along with images before the suggestion is used to update the belief and after the suggestion is used to update the belief. The actions depicted on the bottom on in reference to the selected action with the displayed belief.
 
 ## Multiple Simulations
-We can run multiple simuations by using the `num_sim` keyword argument
+We can run multiple simuations by using the `num_sims` keyword argument
 ```julia
 julia> run_sim(:tag; num_sims=10)
 ```
@@ -100,7 +100,7 @@ Agent: scaled, τ = 0.75
   ```
 
 
-## `run_sim ` Function
+## Function `run_sim`
 Runs simlulations and reports key metrics.
 
 ### Arguments
@@ -199,6 +199,7 @@ Complete! Saved as: policies/rs_7-8-20-0_pol.jld2
 ```
 generate_and_save_Q(:rs78)
 Loading problem and policy...complete!
-
+Calculating action value matrix 100%|████████████████████████████████████████| Time: 1:13:19 (23.60 ms/it)
 ```
 
+After generating the policy and the Q matrix, you should have two more files saved in the `policies` folder (`rs_7-8-20-0_pol.jld2` and `rs_7-8-20-0_Q.jld2`). Now you can run simluations with the `:rs78` symbol as described in the Running Simulations section.
