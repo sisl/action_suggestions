@@ -147,7 +147,11 @@ function run_sim(
             # Get the suggested action
             if agent in [:naive, :scaled, :noisy]
                 if rand(rng) <= perfect_v_random
-                    suggestion = action(policy, bₛ)
+                    if problem in RS_PROBS
+                        suggestion = action(policy, bₛ)
+                    else
+                        suggestion = a_p # For Tag, suggester has perfect knowledge
+                    end
                 else
                     suggestion = rand(rng, actions(pomdp))
                 end

@@ -19,7 +19,7 @@ function get_problem_and_policy(problem::Symbol)
     else
         error("Problem not defined")
     end
-    load_str = "./policies/" * load_str
+    load_str = "policies/" * load_str
     @printf("Loading problem and policy...")
     @load(load_str * "_pol.jld2", pol)
     @printf("complete!\n")

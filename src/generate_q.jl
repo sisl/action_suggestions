@@ -26,7 +26,7 @@ making. Mit Press, 2022.
 # Returns
 - `Q::Matrix{Float64}(length(state_space), length(A))`: action value function as a matrix
 """
-function generage_and_save_Q(problem::Symbol)
+function generate_and_save_Q(problem::Symbol)
     problem in RS_PROBS || problem in TG_PROBS || error("Invalid problem: $problem")
 
     pomdp, pol, load_str = get_problem_and_policy(problem)

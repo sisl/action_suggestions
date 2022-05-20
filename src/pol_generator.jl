@@ -46,7 +46,7 @@ function generate_problem_and_policy(
                             (6,2),
                             (7,8)]
             init_pos = (3,4)
-        elseif problem = :rs78
+        elseif problem == :rs78
             save_str = "rs_7-8-20-0_pol.jld2"
             map_size = (7, 8)
             sensor_efficiency = 10.0
@@ -75,15 +75,17 @@ function generate_problem_and_policy(
                     discount_factor=discount_factor
                 )
     elseif problem in TG_PROBS
-        save_str = "tag_pol.jld2"
-        pomdp = TagPOMDP()
+        if problem == :tag
+            save_str = "tag_pol.jld2"
+            pomdp = TagPOMDP()
+        end
     end
 
     solver = SARSOPSolver(; timeout=timeout, kwargs...)
-    policy = solve(solver, pomdp)
+    pol = solve(solver, pomdp)
 
-    save_str = "../policies/" * save_str
-    @save(save_str, policy)
+    save_str = "policies/" * save_str
+    @save(save_str, pol)
     println("Complete! Saved as: $save_str")
     return nothing
 end
