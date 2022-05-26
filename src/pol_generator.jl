@@ -39,8 +39,8 @@ function generate_problem_and_policy(
         if problem == :rs84
             save_str = "rs_8-4-10-1_pol.jld2"
             map_size = (8, 8)
-            sensor_efficiency = 20.0
-            sensor_use_penalty = 0.0
+            sensor_efficiency = 10.0
+            sensor_use_penalty = -1.0
             rocks_positions = [(1,1),
                             (2,7),
                             (6,2),
@@ -49,8 +49,8 @@ function generate_problem_and_policy(
         elseif problem == :rs78
             save_str = "rs_7-8-20-0_pol.jld2"
             map_size = (7, 8)
-            sensor_efficiency = 10.0
-            sensor_use_penalty = -1.0
+            sensor_efficiency = 20.0
+            sensor_use_penalty = 0.0
             rocks_positions = [(3,1),
                             (1,2),
                             (4,2),
