@@ -1,14 +1,22 @@
 
+# Repository for Collaborative Decision Making Using Action Suggestions
 
 # Setting up the envrionment
-The development occurred using Julia v1.7 and v1.8. Recommend using the latest version of Julia. Navigate to the supp_material folder and run Julia.
+The development occurred using Julia v1.7 and v1.8. Recommend using the latest version of Julia. 
 
-We first need to activate the environment, add the local Tag module and then instantiate and build the project. This process is scripted in `setup.jl`. You can run this file by:
+First, clone the repo, change to the main folder, and run Julia.
+```
+git clone .........
+cd  action_suggestions
+julia
+```
+
+We first need to activate the environment and then instantiate and build the project. This process is scripted in `setup.jl`. You can run this file by:
 ```julia
 julia> include("setup.jl")
 ```
 
-The supplemental material was supplied with polices and action value functions for RockSample(8, 4, 10, -1) and Tag(). You can start running those simulations immediately. Reference the Running Simulations section. To simulate the RockSample(7, 8, 20, 0) environment, you will need to generate the policy and action value matrix. Reference the Generating Policies section for directions on completing that process. The problems are referenced using the `:rs84` and `:tag` Symbols.  The RockSample(7, 8, 10, 0) problem has the `:rs78` Symbol defined and ready for use after a policy and action value matrix is generated.
+This repo contains polices and action value functions for RockSample(8, 4, 10, -1), Tag with the modified transition function, and the original implementation of Tag. You can start running those simulations immediately. Reference the Running Simulations section. To simulate the RockSample(7, 8, 20, 0) environment, you will need to generate the policy and action value matrix. Reference the Generating Policies section for directions on completing that process. The problems are referenced using the `:rs84`, `:tag`, and `:tag_orig_tx` Symbols.  The RockSample(7, 8, 10, 0) problem has the `:rs78` Symbol defined and ready for use after a policy and action value matrix is generated.
 
 # Running Simulations
 The simulattion function is defined in `run_sims.jl` and is the `run_sim` function. See the doc string for detailed information about the arguments for this function. This file should be included when running the `setup.jl` script. However, if it was not, we can include this file by
