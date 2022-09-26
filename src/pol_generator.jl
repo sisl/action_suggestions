@@ -2,7 +2,7 @@ using POMDPs
 using SARSOP
 using JLD2
 using RockSample
-using Tag
+using TagPOMDPProblem
 
 include("constants.jl")
 
@@ -78,6 +78,9 @@ function generate_problem_and_policy(
         if problem == :tag
             save_str = "tag_pol.jld2"
             pomdp = TagPOMDP()
+        elseif problem == :tag_orig_tx
+            save_str = "tag_orig_tx_pol.jld2"
+            pomdp = TagPOMDP(; orig_transition_fcn=true)
         end
     end
 

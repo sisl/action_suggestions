@@ -4,11 +4,11 @@ using JLD2
 using ProgressMeter
 
 using POMDPs
-using POMDPModelTools
+using POMDPTools
 using RockSample
-using Tag
+using TagPOMDPProblem
 
-using BeliefUpdaters: updater
+# using BeliefUpdaters: updater
 using SparseArrays: sparsevec
 using StaticArrays: SVector
 

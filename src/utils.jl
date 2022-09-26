@@ -7,7 +7,8 @@ Returns the saved pomdp, policy and a string based on naming scheme
 - `problem::Symbol`: problem of interest
     - `:rs78`: RockSample(7, 8, 20, 0)
     - `:rs84`: RockSample(8, 4, 10, -1)
-    - `:tag`: Tag(), standard tag problem
+    - `:tag`: TagPOMDP(), standard tag problem with modified transition
+    - `:tag_orig_tx`: TagPOMDP(; orig_transition_fcn=true)
 """
 function get_problem_and_policy(problem::Symbol)
     if problem == :rs78
@@ -16,6 +17,8 @@ function get_problem_and_policy(problem::Symbol)
         load_str = "rs_8-4-10-1"
     elseif problem == :tag
         load_str = "tag"
+    elseif problem == :tag_orig_tx
+        load_str = "tag_orig_tx"
     else
         error("Problem not defined")
     end
