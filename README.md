@@ -1,8 +1,8 @@
 
 # Repository for Collaborative Decision Making Using Action Suggestions
-
-# Setting up the envrionment
-The development occurred using Julia v1.7 and v1.8. Recommend using the latest version of Julia. 
+<!-- This repository contains the code used for the experiments in the paper Collaborative Decision Making Using Action Suggestions. If you find You can find the paper on the NeurIPS proceedings here and arXiv here. -->
+# Setting up the environment
+The development occurred using Julia v1.7 and v1.8. We recommend using the latest version of Julia. 
 
 First, clone the repo, change to the main folder, and run Julia.
 ```
@@ -19,7 +19,7 @@ julia> include("setup.jl")
 This repo contains polices and action value functions for RockSample(8, 4, 10, -1), Tag with the modified transition function, and the original implementation of Tag. You can start running those simulations immediately. Reference the Running Simulations section. To simulate the RockSample(7, 8, 20, 0) environment, you will need to generate the policy and action value matrix. Reference the [Generating Policies](#generating-policies) section for directions on completing that process. The problems are referenced using the `:rs84`, `:tag`, and `:tag_orig_tx` Symbols.  The RockSample(7, 8, 10, 0) problem has the `:rs78` Symbol defined and ready for use after a policy and action value matrix is generated.
 
 # Running Simulations
-The simulattion function is defined in [`run_sims.jl`](https://github.com/dylan-asmar/supp_material/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/run_sims.jl) and is the `run_sim` function. See the doc string for detailed information about the arguments for this function. This file should be included when running the `setup.jl` script. However, if it was not, we can include this file by
+The simulation function is defined in [`run_sims.jl`](https://github.com/dylan-asmar/supp_material/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/run_sims.jl) and is the `run_sim` function. See the doc string for detailed information about the arguments for this function. This file should be included when running the `setup.jl` script. However, if it was not, we can include this file by
 ```julia
 julia> include("src/run_sims.jl")
 ```
@@ -46,10 +46,10 @@ Agent: normal
 Details at each step can be output by setting the `verbose` keyword to `true`. A summary of key parameters will be output to the REPL at each time step. Recommend using `verbose` for single runs only (i.e. `num_sims = 1`)!
 
 ### Visualize
-A visual depiction of the scneario can be output by setting the `visualize` keyword to `true`. Recommend using `visualize` for single runs only! In each scenario, a visualization of the belief is shown along with images before the suggestion is used to update the belief and after the suggestion is used to update the belief. The actions depicted on the bottom on in reference to the selected action with the displayed belief.
+A visual depiction of the scenario can be output by setting the `visualize` keyword to `true`. Recommend using `visualize` for single runs only! In each scenario, a visualization of the belief is shown along with images before the suggestion is used to update the belief and after the suggestion is used to update the belief. The actions depicted on the bottom on in reference to the selected action with the displayed belief.
 
 ## Multiple Simulations
-We can run multiple simuations by using the `num_sims` keyword argument
+We can run multiple situations by using the `num_sims` keyword argument
 ```julia
 julia> run_sim(:tag; num_sims=10)
 ```
@@ -109,14 +109,14 @@ Agent: scaled, τ = 0.75
 
 
 ## Function [`run_sim`](https://github.com/dylan-asmar/supp_material/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/run_sims.jl#L57)
-Runs simlulations and reports key metrics.
+Runs simulations and reports key metrics.
 
 ### Arguments
 - `problem::Symbol`: Problem to simulate (see [RS_PROBS](https://github.com/dylan-asmar/supp_material/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/constants.jl#L1) and [TG_PROBS](https://github.com/dylan-asmar/supp_material/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/constants.jl#L2) in [`constants.jl`](https://github.com/dylan-asmar/supp_material/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/constants.jl) for options)
 
-### Keword Arguments
+### Keyword Arguments
 - `num_steps::Int=50`: number of steps in each simulation
-- `num_sims::Int=1`: number of simlulations to run
+- `num_sims::Int=1`: number of simulations to run
 - `verbose::Bool=false`: print out details of each step
 - `visualize::Bool=false`: render the environment at each step (2x per step)
 - `agent::Symbol=:normal`: Which agent to simulate (see AGENTS for options)
@@ -124,22 +124,22 @@ Runs simlulations and reports key metrics.
 - `τ=1.0`: hyperparameter for the scaled agent
 - `λ=1.0`: hyperparameter for the noisy agent
 - `max_suggestions=Inf`: Limit of the number of suggestions the agent can receive
-- `msg_reception_rate=1.0`: Recption rate of the agent for suggetsions
+- `msg_reception_rate=1.0`: Reception rate of the agent for suggestions
 - `perfect_v_random=1.0`: Rate of perfect vs random suggestions (1.0=perfect, 0.0=random)
 - `init_rocks=nothing`: For RockSamplePOMDP only. Designate the state of initial rocks. Must
 be a vector with length equal to the number of rocks (e.g. [1, 0, 0, 1])
-- `suggester_belief=[1.0, 0.0]`: RockSamplePOMDP only. Designate the iniital belief over
+- `suggester_belief=[1.0, 0.0]`: RockSamplePOMDP only. Designate the initial belief over
 good rocks and bad rocks respectively. [1.0, 0.0] = perfect knowledge suggester,
 [0.75, 0.5] would represent a suggester with a bit more knowledge over good rocks but no
 additional information for the bad rocks.
-- `init_pos=nothing`: TagPOMDP only. Set the iniital positions of the agent and opponent.
+- `init_pos=nothing`: TagPOMDP only. Set the initial positions of the agent and opponent.
 The form is Vector{Tuple{Int, Int}}. E.g. [(1, 1), (5, 2)].
 - `rng=Random.GLOBAL_RNG`: Provide a random number generator
 
 
 # Generating Policies
 
-The function to generate and save policies is in [`pol_generator.jl`](https://github.com/dylan-asmar/supp_material/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/pol_generator.jl) and the fuction to generate and save the action value funciton as a matrix is contained in [`generate_q.jl`](https://github.com/dylan-asmar/supp_material/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/generate_q.jl). Both of these files are included by the `setup.jl` script but can be included manually if needed.
+The function to generate and save policies is in [`pol_generator.jl`](https://github.com/dylan-asmar/supp_material/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/pol_generator.jl) and the function to generate and save the action value function as a matrix is contained in [`generate_q.jl`](https://github.com/dylan-asmar/supp_material/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/generate_q.jl). Both of these files are included by the `setup.jl` script but can be included manually if needed.
 
 To generate and save a policy, call `generate_problem_and_policy` with the problem of interest. Parameters can be passed to the SARSOP solver by keywords. For the RockSample(7, 8, 20, 0) results contained in the paper, a timeout value of `10800` was used.
 
@@ -210,4 +210,13 @@ Loading problem and policy...complete!
 Calculating action value matrix 100%|████████████████████████████████████████| Time: 1:13:19 (23.60 ms/it)
 ```
 
-After generating the policy and the Q matrix, you should have two more files saved in the `policies` folder (`rs_7-8-20-0_pol.jld2` and `rs_7-8-20-0_Q.jld2`). Now you can run simluations with the `:rs78` symbol as described in the Running Simulations section.
+After generating the policy and the Q matrix, you should have two more files saved in the `policies` folder (`rs_7-8-20-0_pol.jld2` and `rs_7-8-20-0_Q.jld2`). Now you can run simulations with the `:rs78` symbol as described in the Running Simulations section.
+
+# Citation
+```
+@inproceedings{Asmar2022},
+title = {Collaborative Decision Making Using Action Suggestions},
+author = {Dylan M. Asmar and Mykel J. Kochenderfer},
+booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+year = {2022}
+```
