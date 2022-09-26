@@ -6,12 +6,12 @@ The development occurred using Julia v1.7 and v1.8. We recommend using the lates
 
 First, clone the repo, change to the main folder, and run Julia.
 ```
-git clone .........
+git clone git@github.com:dylan-asmar/action_suggestions.git
 cd  action_suggestions
 julia
 ```
 
-We first need to activate the environment and include the supporting scripts. This process is scripted in [`setup.jl`](https://github.com/dylan-asmar/supp_material/blob/4b3834319cd86301a118fea0c62a66612e650c86/setup.jl). You can run this file by:
+We first need to activate the environment and include the supporting scripts. This process is scripted in [`setup.jl`](https://github.com/dylan-asmar/action_suggestions/blob/4b3834319cd86301a118fea0c62a66612e650c86/setup.jl). You can run this file by:
 ```julia
 julia> include("setup.jl")
 ```
@@ -19,7 +19,7 @@ julia> include("setup.jl")
 This repo contains polices and action value functions for RockSample(8, 4, 10, -1), Tag with the modified transition function, and the original implementation of Tag. You can start running those simulations immediately. Reference the Running Simulations section. To simulate the RockSample(7, 8, 20, 0) environment, you will need to generate the policy and action value matrix. Reference the [Generating Policies](#generating-policies) section for directions on completing that process. The problems are referenced using the `:rs84`, `:tag`, and `:tag_orig_tx` Symbols.  The RockSample(7, 8, 10, 0) problem has the `:rs78` Symbol defined and ready for use after a policy and action value matrix is generated.
 
 # Running Simulations
-The simulation function is defined in [`run_sims.jl`](https://github.com/dylan-asmar/supp_material/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/run_sims.jl) and is the `run_sim` function. See the doc string for detailed information about the arguments for this function. This file should be included when running the `setup.jl` script. However, if it was not, we can include this file by
+The simulation function is defined in [`run_sims.jl`](https://github.com/dylan-asmar/action_suggestions/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/run_sims.jl) and is the `run_sim` function. See the doc string for detailed information about the arguments for this function. This file should be included when running the `setup.jl` script. However, if it was not, we can include this file by
 ```julia
 julia> include("src/run_sims.jl")
 ```
@@ -108,11 +108,11 @@ Agent: scaled, τ = 0.75
   ```
 
 
-## Function [`run_sim`](https://github.com/dylan-asmar/supp_material/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/run_sims.jl#L57)
+## Function [`run_sim`](https://github.com/dylan-asmar/action_suggestions/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/run_sims.jl#L57)
 Runs simulations and reports key metrics.
 
 ### Arguments
-- `problem::Symbol`: Problem to simulate (see [RS_PROBS](https://github.com/dylan-asmar/supp_material/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/constants.jl#L1) and [TG_PROBS](https://github.com/dylan-asmar/supp_material/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/constants.jl#L2) in [`constants.jl`](https://github.com/dylan-asmar/supp_material/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/constants.jl) for options)
+- `problem::Symbol`: Problem to simulate (see [RS_PROBS](https://github.com/dylan-asmar/action_suggestions/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/constants.jl#L1) and [TG_PROBS](https://github.com/dylan-asmar/action_suggestions/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/constants.jl#L2) in [`constants.jl`](https://github.com/dylan-asmar/action_suggestions/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/constants.jl) for options)
 
 ### Keyword Arguments
 - `num_steps::Int=50`: number of steps in each simulation
@@ -139,7 +139,7 @@ The form is Vector{Tuple{Int, Int}}. E.g. [(1, 1), (5, 2)].
 
 # Generating Policies
 
-The function to generate and save policies is in [`pol_generator.jl`](https://github.com/dylan-asmar/supp_material/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/pol_generator.jl) and the function to generate and save the action value function as a matrix is contained in [`generate_q.jl`](https://github.com/dylan-asmar/supp_material/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/generate_q.jl). Both of these files are included by the `setup.jl` script but can be included manually if needed.
+The function to generate and save policies is in [`pol_generator.jl`](https://github.com/dylan-asmar/action_suggestions/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/pol_generator.jl) and the function to generate and save the action value function as a matrix is contained in [`generate_q.jl`](https://github.com/dylan-asmar/action_suggestions/blob/4b3834319cd86301a118fea0c62a66612e650c86/src/generate_q.jl). Both of these files are included by the `setup.jl` script but can be included manually if needed.
 
 To generate and save a policy, call `generate_problem_and_policy` with the problem of interest. Parameters can be passed to the SARSOP solver by keywords. For the RockSample(7, 8, 20, 0) results contained in the paper, a timeout value of `10800` was used.
 
