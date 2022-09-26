@@ -1,3 +1,5 @@
 *.DS_Store
 /Manifest.toml
 rs_7-8*
+model.pomdpx
+policy.out
