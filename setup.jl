@@ -1,7 +1,6 @@
 using Pkg
 
 Pkg.activate("./")
-Pkg.develop(;path="./src/Tag.jl")
 Pkg.instantiate()
 Pkg.build()
 
