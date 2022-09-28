@@ -1,6 +1,7 @@
 
 # Repository for Collaborative Decision Making Using Action Suggestions
-<!-- This repository contains the code used for the experiments in the paper Collaborative Decision Making Using Action Suggestions. If you find You can find the paper on the NeurIPS proceedings here and arXiv here. -->
+This repository contains the code used for the experiments in the paper Collaborative Decision Making Using Action Suggestions. You can find the paper [here](https://arxiv.org/abs/2209.13160). <!-- on ArXiv here and the NeurIPS proceedings here. -->
+
 # Setting up the environment
 The development occurred using Julia v1.7 and v1.8. We recommend using the latest version of Julia. 
 
