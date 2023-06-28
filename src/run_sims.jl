@@ -159,7 +159,7 @@ function run_sim(
 
             # Show depiction of state
             if visualize
-                step = (s=sᵢ, a=a_n, b=bᵢ)
+                step = (s=sᵢ, a=a_n, b=belief_sparse(bᵢ, state_list))
                 display(render(pomdp, step; pre_act_text="Pre oˢ: "))
             end
 
@@ -227,7 +227,7 @@ function run_sim(
             end
 
             if visualize
-                step = (s=sᵢ, a=a, o=o, b=bᵢ)
+                step = (s=sᵢ, a=a, o=o, b=belief_sparse(bᵢ, state_list))
                 display(render(pomdp, step; pre_act_text="Post oˢ: "))
             end
 

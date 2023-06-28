@@ -19,4 +19,4 @@ TagPOMDPProblem = "8a653263-a1cc-4cf9-849f-f530f6ffc800"
 
 [compat]
 julia = "1"
-RockSample = "=0.1.5"
+RockSample = "^0.1.6"
