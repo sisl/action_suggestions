@@ -17,7 +17,7 @@ Perform a belief update based on an action suggestion
 # Returns
 Updated belief
 """
-function update_as_obs(agent::Symbol, state_space, policy, b, suggestion, Q, τ, λ)
+function update_as_obs(agent::Symbol, state_space, policy::Policy, b::Vector, suggestion, Q::Matrix, τ::Float64, λ::Float64)
     if agent == :naive
         return b
     elseif agent == :scaled
@@ -34,7 +34,7 @@ end
 
 Perform belief update based on an action suggestion with the scaled rational method
 """
-function update_as_obs_scaled(state_space, policy, b, suggestion, τ)
+function update_as_obs_scaled(state_space, policy::Policy, b::Vector, suggestion, τ::Float64)
     pomdp = policy.pomdp
     bp = zeros(length(state_space))
     p = τ
@@ -60,7 +60,7 @@ end
 
 Perform belief update based on an action suggestion with the noisy rational method
 """
-function update_as_obs_noisy(state_space, b, suggestion, Q, λ)
+function update_as_obs_noisy(state_space, b::Vector, suggestion, Q::Matrix, λ::Float64)
     bp = zeros(length(state_space))
     for si in 1:length(state_space)
         p_suggestion = prob_of_a(Q, si, suggestion, λ)
