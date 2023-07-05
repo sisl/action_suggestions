@@ -12,6 +12,7 @@ using RockSample
 using TagPOMDPProblem
 
 using SparseArrays: sparsevec
+using SparseArrays: SparseVector
 using StaticArrays: SVector
 
 # To visualize RockSample
@@ -83,7 +84,7 @@ function run_sim(
         num_rocks = length(pomdp.rocks_positions)
     end
 
-    Q = nothing
+    Q = Matrix{Float64}(undef, num_states, length(actions(pomdp)))
     if agent == :noisy
         Q_str = load_str * "_Q.jld2"
         @load(Q_str, Q)
@@ -97,8 +98,11 @@ function run_sim(
     Threads.@threads for ijk = 1:num_sims
     # for ijk = 1:num_sims
 
-        suggestion_cnt = 0
-        belief_updater = updater(policy)
+        policy_sugg = deepcopy(policy)
+        policy_agent = deepcopy(policy)
+
+        belief_updater_sugg = updater(policy_sugg)
+        belief_updater_agent = updater(policy_agent)
 
         # Get iniital state
         sᵢ = rand(rng, initialstate(pomdp))
@@ -130,23 +134,24 @@ function run_sim(
             suggester_b = SparseCat([sᵢ], [1.0])
         end
 
-        bᵢ = beliefvec(pomdp, num_states, initialstate(pomdp))
-        bₛ = beliefvec(pomdp, num_states, suggester_b)
+        bᵢ = beliefvector(pomdp, num_states, initialstate(pomdp))
+        bₛ = beliefvector(pomdp, num_states, suggester_b)
 
+        suggestion_cnt = 0
         step_cnt = 0
         total_reward = 0.0
         for kk = 1:num_steps
             step_cnt += 1
             t = kk # Sim time
             bₒ = bᵢ # Original belief before any updates
-            a_n = action(policy, bᵢ) # Action based on current belief
-            a_p = action_known_state(policy, stateindex(pomdp, sᵢ)) # Perfect state belief
+            a_n = action(policy_agent, bᵢ) # Action based on current belief
+            a_p = action_known_state(policy_sugg, stateindex(pomdp, sᵢ)) # Perfect state belief
 
             # Get the suggested action
             if agent in [:naive, :scaled, :noisy]
                 if rand(rng) <= perfect_v_random
                     if problem in RS_PROBS
-                        suggestion = action(policy, bₛ)
+                        suggestion = action(policy_sugg, bₛ)
                     else
                         suggestion = a_p # For Tag, suggester has perfect knowledge
                     end
@@ -159,7 +164,7 @@ function run_sim(
 
             # Show depiction of state
             if visualize
-                step = (s=sᵢ, a=a_n, b=bᵢ)
+                step = (s=sᵢ, a=a_n, b=belief_sparse(bᵢ, state_list))
                 display(render(pomdp, step; pre_act_text="Pre oˢ: "))
             end
 
@@ -177,7 +182,7 @@ function run_sim(
                         a′ = a_n
                     end
                 else
-                    a′ = action(policy, b′)
+                    a′ = action(policy_agent, b′)
                 end
             else
                 b′ = bᵢ
@@ -226,18 +231,25 @@ function run_sim(
                 end
             end
 
+            if !(bᵢ isa SparseCat)
+                bᵢ = SparseCat(state_list, bᵢ)
+            end
+            if !(bₛ isa SparseCat)
+                bₛ = SparseCat(state_list, bₛ)
+            end
+
             if visualize
                 step = (s=sᵢ, a=a, o=o, b=bᵢ)
                 display(render(pomdp, step; pre_act_text="Post oˢ: "))
             end
 
             # Update agent's belief with observation from environment
-            bᵢ′ = update(belief_updater, SparseCat(state_list, bᵢ), a, o)
-            bᵢ = beliefvec(pomdp, num_states, bᵢ′)
+            bᵢ′ = update(belief_updater_agent, bᵢ, a, o)
+            bᵢ = beliefvector(pomdp, num_states, bᵢ′)
 
             # Update suggester belief with observation (not a factor if perfect knowledge)
-            bₛ′ = update(belief_updater, SparseCat(state_list, bₛ), a, o)
-            bₛ = beliefvec(pomdp, num_states, bₛ′)
+            bₛ′ = update(belief_updater_sugg, bₛ, a, o)
+            bₛ = beliefvector(pomdp, num_states, bₛ′)
 
             sᵢ = sp # Update state to transitioned to state
             total_reward += pomdp.discount_factor^(t - 1) * r

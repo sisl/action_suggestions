@@ -70,15 +70,29 @@ function initialbelief(pomdp::RockSamplePOMDP{K}, rock_beliefs::Vector{<:Real}) 
 end
 
 # Converts a vector based belief to a SparseCat
-function belief_sparse(b, state_list)
+function belief_sparse(b::Vector, state_list)
     nzind = collect(1:length(b))[b.!=0]
     b_sparse = b[nzind]
     state_sparse = state_list[nzind]
     return SparseCat(state_sparse, b_sparse)
 end
 
+function belief_sparse(b::SparseVector, state_list)
+    return SparseCat(state_list[b.nzind], b.nzval)
+end
+
 # Gets the action from an alpha vector policy if your belief is based at one state (truth)
 function action_known_state(policy, state_idx::Int)
     α_idx = argmax(αᵢ[state_idx] for αᵢ in policy.alphas)
     return policy.action_map[α_idx]
+end
+
+function beliefvector(m::POMDP, n, b)
+    b = beliefvec(m, n, b)
+    if b isa SparseVector
+        b′ = zeros(n)
+        b′[b.nzind] = b.nzval
+        b = b′
+    end
+    return b
 end
