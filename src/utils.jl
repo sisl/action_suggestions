@@ -96,3 +96,12 @@ function beliefvector(m::POMDP, n, b)
     end
     return b
 end
+
+struct est_value_policy
+    policy::Policy
+end
+
+import BasicPOMCP.estimate_value
+function BasicPOMCP.estimate_value(o::est_value_policy, pomdp, s, h, steps)
+    return value(o.policy, SparseCat([s], [1.0]))
+end

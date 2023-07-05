@@ -11,6 +11,9 @@ using POMDPTools
 using RockSample
 using TagPOMDPProblem
 
+using BasicPOMCP
+using ParticleFilters
+
 using SparseArrays: sparsevec
 using SparseArrays: SparseVector
 using StaticArrays: SVector
@@ -57,6 +60,7 @@ The form is Vector{Tuple{Int, Int}}. E.g. [(1, 1), (5, 2)].
 """
 function run_sim(
     problem::Symbol;
+    policy_type::Symbol=:alpha_vector,
     num_steps::Int=50,
     num_sims::Int=1,
     verbose::Bool=false,
@@ -71,6 +75,10 @@ function run_sim(
     init_rocks=nothing,
     suggester_belief=[1.0, 0.0],
     init_pos=nothing,
+    pomcp_max_depth=25,
+    pomcp_c=15.0,
+    pomcp_tree_queries=200000,
+    pomcp_max_time=7.0,
     rng=Random.GLOBAL_RNG
 )
     problem in RS_PROBS || problem in TG_PROBS || error("Invalid problem: $problem")
@@ -99,7 +107,23 @@ function run_sim(
     # for ijk = 1:num_sims
 
         policy_sugg = deepcopy(policy)
-        policy_agent = deepcopy(policy)
+
+        if policy_type == :alpha_vector
+            policy_agent = deepcopy(policy)
+        elseif policy_type == :pomcp
+            solver = POMCPSolver(;
+                max_depth=pomcp_max_depth,
+                c=pomcp_c,
+                tree_queries=pomcp_tree_queries,
+                max_time=pomcp_max_time,
+                tree_in_info=false,
+                estimate_value=est_value_policy(policy),
+                rng=rng
+            )
+            policy_agent = solve(solver, pomdp)
+        else
+            error("Invalid policy_type: $policy_type")
+        end
 
         belief_updater_sugg = updater(policy_sugg)
         belief_updater_agent = updater(policy_agent)
@@ -144,8 +168,12 @@ function run_sim(
             step_cnt += 1
             t = kk # Sim time
             bₒ = bᵢ # Original belief before any updates
-            a_n = action(policy_agent, bᵢ) # Action based on current belief
-            a_p = action_known_state(policy_sugg, stateindex(pomdp, sᵢ)) # Perfect state belief
+
+            # Action based on current belief
+            a_n, info = action_info(policy_agent, belief_sparse(bᵢ, state_list))
+
+            # Perfect state belief
+            a_p = action_known_state(policy_sugg, stateindex(pomdp, sᵢ))
 
             # Get the suggested action
             if agent in [:naive, :scaled, :noisy]
@@ -174,16 +202,7 @@ function run_sim(
                 (rand(rng) <= msg_reception_rate)) # Factor in reception rate
 
                 suggestion_cnt += 1 # Increment suggestion count, we are processing it
-                b′ = update_as_obs(agent, state_list, policy, bᵢ, suggestion, Q, τ, λ)
-                if agent == :naive
-                    if rand(rng) <= ν
-                        a′ = suggestion
-                    else
-                        a′ = a_n
-                    end
-                else
-                    a′ = action(policy_agent, b′)
-                end
+                a′, b′ = update_as_obs(agent, state_list, policy_agent, bᵢ, suggestion, Q, ν, τ, λ, rng)
             else
                 b′ = bᵢ
                 a′ = a_n
@@ -195,7 +214,7 @@ function run_sim(
             elseif agent == :perfect
                 a = a_p
             elseif agent == :random
-                a = rand(rng, actions(pomdp))
+                a = rand(rng, actions(pomdp), bᵢ)
             elseif agent in [:naive, :scaled, :noisy]
                 a = a′
                 bᵢ = b′
