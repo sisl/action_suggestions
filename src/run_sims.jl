@@ -18,6 +18,8 @@ using SparseArrays: sparsevec
 using SparseArrays: SparseVector
 using StaticArrays: SVector
 
+import POMDPs: update
+
 # To visualize RockSample
 using Cairo
 using Fontconfig
@@ -60,15 +62,12 @@ The form is Vector{Tuple{Int, Int}}. E.g. [(1, 1), (5, 2)].
 """
 function run_sim(
     problem::Symbol;
+    agent::AgentType=NormalAgent(),
     policy_type::Symbol=:alpha_vector,
     num_steps::Int=50,
     num_sims::Int=1,
     verbose::Bool=false,
     visualize::Bool=false,
-    agent::Symbol=:normal,
-    ν=1.0,
-    τ=1.0,
-    λ=1.0,
     max_suggestions=Inf,
     msg_reception_rate=1.0,
     perfect_v_random=1.0,
@@ -82,7 +81,6 @@ function run_sim(
     rng=Random.GLOBAL_RNG
 )
     problem in RS_PROBS || problem in TG_PROBS || error("Invalid problem: $problem")
-    agent in AGENTS || error("Invalid agent: $agent")
 
     pomdp, policy, load_str = get_problem_and_policy(problem)
     state_list = [pomdp...]
@@ -93,9 +91,10 @@ function run_sim(
     end
 
     Q = Matrix{Float64}(undef, num_states, length(actions(pomdp)))
-    if agent == :noisy
+    if agent isa NoisyAgent
         Q_str = load_str * "_Q.jld2"
         @load(Q_str, Q)
+        agent = NoisyAgent(agent.λ, Q)
     end
 
     r_vec = Vector{Float64}(undef, num_sims)
@@ -127,6 +126,8 @@ function run_sim(
 
         belief_updater_sugg = updater(policy_sugg)
         belief_updater_agent = updater(policy_agent)
+
+        suggestion_updater = SuggestionUpdater(pomdp, agent, policy_agent, rng)
 
         # Get iniital state
         sᵢ = rand(rng, initialstate(pomdp))
@@ -176,7 +177,7 @@ function run_sim(
             a_p = action_known_state(policy_sugg, stateindex(pomdp, sᵢ))
 
             # Get the suggested action
-            if agent in [:naive, :scaled, :noisy]
+            if any(isa.([agent], [NaiveAgent, ScaledAgent, NoisyAgent]))
                 if rand(rng) <= perfect_v_random
                     if problem in RS_PROBS
                         suggestion = action(policy_sugg, bₛ)
@@ -202,20 +203,21 @@ function run_sim(
                 (rand(rng) <= msg_reception_rate)) # Factor in reception rate
 
                 suggestion_cnt += 1 # Increment suggestion count, we are processing it
-                a′, b′ = update_as_obs(agent, state_list, policy_agent, bᵢ, suggestion, Q, ν, τ, λ, rng)
+
+                a′, b′ = update(suggestion_updater, bᵢ, a_n, suggestion, RequestNewAction(), info)
             else
-                b′ = bᵢ
                 a′ = a_n
+                b′ = bᵢ
             end
 
             # a is exectued action. Select based on agent type
-            if agent == :normal
+            if agent isa NormalAgent
                 a = a_n
-            elseif agent == :perfect
+            elseif agent isa PerfectAgent
                 a = a_p
-            elseif agent == :random
-                a = rand(rng, actions(pomdp), bᵢ)
-            elseif agent in [:naive, :scaled, :noisy]
+            elseif agent isa RandomAgent
+                a = rand(rng, actions(pomdp, sᵢ))
+            else
                 a = a′
                 bᵢ = b′
             end
@@ -240,11 +242,11 @@ function run_sim(
                 println()
                 println("--- Initial Belief at t = $t ---")
                 display(belief_sparse(bₒ, state_list))
-                if agent in [:scaled, :noisy, :naive]
+                if any(isa.([agent], [NaiveAgent, ScaledAgent, NoisyAgent]))
                     println("--- Suggester Belief at t = $t ---")
                     display(belief_sparse(bₛ, state_list))
                 end
-                if agent in [:scaled, :noisy] && a_n != suggestion
+                if any(isa.([agent], [ScaledAgent, NoisyAgent])) && a_n != suggestion
                     println("--- Updated Belief at t = $t ---")
                     display(belief_sparse(bᵢ, state_list))
                 end
@@ -298,14 +300,29 @@ function run_sim(
     sug_p_step_std = std(sug_p_step_vec)
     sug_p_step_std_err = sug_p_step_std / sqrt(num_sims)
 
-    @printf("Agent: %s", agent)
-    if agent == :naive
-        @printf(", ν = %.2f", ν)
-    elseif agent == :scaled
-        @printf(", τ = %.2f", τ)
-    elseif agent == :noisy
-        @printf(", λ = %.2f", λ)
+    @printf("Agent: %s\n", agent)
+    # if agent isa NaiveAgent
+    #     @printf(", ν = %.2f", agent.ν)
+    # elseif agent isa ScaledAgent
+    #     @printf(", τ = %.2f", agent.τ)
+    # elseif agent == NoisyAgent
+    #     @printf(", λ = %.2f", agent.λ)
+    # end
+    @printf("Max Steps: %d\n", num_steps)
+    @printf("Max Suggestions: %d\n", max_suggestions)
+    @printf("Message Reception Rate: %.2f\n", msg_reception_rate)
+    @printf("Perfect vs Random: %.2f\n", perfect_v_random)
+    @printf("Init Rocks: %s\n", init_rocks)
+    @printf("Suggester Belief: %s\n", suggester_belief)
+    @printf("Init position: %s\n", init_pos)
+    if policy_type == :pomcp
+        @printf("POMCP Max Depth: %d\n", pomcp_max_depth)
+        @printf("POMCP C: %.2f\n", pomcp_c)
+        @printf("POMCP Tree Queries: %d\n", pomcp_tree_queries)
+        @printf("POMCP Max Time: %.2f\n", pomcp_max_time)
     end
+
+
     @printf("\n")
     @printf("%15s | %15s | %15s | %15s | %15s\n",
         "Metric", "Mean", "Standard Dev", "Standard Error", "+/- 95 CI")

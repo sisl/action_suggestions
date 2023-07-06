@@ -82,7 +82,7 @@ function belief_sparse(b::SparseVector, state_list)
 end
 
 # Gets the action from an alpha vector policy if your belief is based at one state (truth)
-function action_known_state(policy, state_idx::Int)
+function action_known_state(policy::AlphaVectorPolicy, state_idx::Int)
     α_idx = argmax(αᵢ[state_idx] for αᵢ in policy.alphas)
     return policy.action_map[α_idx]
 end
