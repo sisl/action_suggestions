@@ -74,10 +74,11 @@ function run_sim(
     init_rocks=nothing,
     suggester_belief=[1.0, 0.0],
     init_pos=nothing,
-    pomcp_max_depth=25,
-    pomcp_c=15.0,
-    pomcp_tree_queries=200000,
-    pomcp_max_time=7.0,
+    pomcp_max_depth=10,
+    pomcp_c=10.0,
+    pomcp_tree_queries=800_000,
+    pomcp_max_time=1.0,
+    pomcp_heuristic=nothing,
     rng=Random.GLOBAL_RNG
 )
     problem in RS_PROBS || problem in TG_PROBS || error("Invalid problem: $problem")
@@ -110,13 +111,23 @@ function run_sim(
         if policy_type == :alpha_vector
             policy_agent = deepcopy(policy)
         elseif policy_type == :pomcp
+            if pomcp_heuristic == :rsexit
+                rsexit = solve(RSExitSolver(), pomdp)
+                value_estimator = est_value_rsexit(rsexit)
+            elseif pomcp_heuristic == :policy
+                value_estimator = est_value_policy(policy)
+            else
+                # value_estimator = RolloutEstimator(policy) # Need to define a belief extractor for this to work
+                value_estimator = RolloutEstimator(RandomSolver(rng))
+            end
+
             solver = POMCPSolver(;
                 max_depth=pomcp_max_depth,
                 c=pomcp_c,
                 tree_queries=pomcp_tree_queries,
                 max_time=pomcp_max_time,
                 tree_in_info=false,
-                estimate_value=est_value_policy(policy),
+                estimate_value=value_estimator,
                 rng=rng
             )
             policy_agent = solve(solver, pomdp)
@@ -301,13 +312,7 @@ function run_sim(
     sug_p_step_std_err = sug_p_step_std / sqrt(num_sims)
 
     @printf("Agent: %s\n", agent)
-    # if agent isa NaiveAgent
-    #     @printf(", ν = %.2f", agent.ν)
-    # elseif agent isa ScaledAgent
-    #     @printf(", τ = %.2f", agent.τ)
-    # elseif agent == NoisyAgent
-    #     @printf(", λ = %.2f", agent.λ)
-    # end
+    @printf("Number of Sims: %s\n", num_sims)
     @printf("Max Steps: %d\n", num_steps)
     @printf("Max Suggestions: %d\n", max_suggestions)
     @printf("Message Reception Rate: %.2f\n", msg_reception_rate)
