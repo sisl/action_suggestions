@@ -4,3 +4,4 @@ rs_7-8*
 model.pomdpx
 policy.out
 src/.DS_Store
+.vscode
