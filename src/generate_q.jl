@@ -8,7 +8,6 @@ using POMDPTools
 using RockSample
 using TagPOMDPProblem
 
-# using BeliefUpdaters: updater
 using SparseArrays: sparsevec
 using StaticArrays: SVector
 
